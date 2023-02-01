@@ -5,7 +5,7 @@ import { FnsService } from './fns.service';
 import { Controller, Get, Query } from '@nestjs/common';
 import { TransactionDto } from 'src/dto/transaction.dto';
 
-@Controller('fns')
+@Controller('')
 export class FnsController {
   constructor(private readonly fnsService: FnsService) {}
 
