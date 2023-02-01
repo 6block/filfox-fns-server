@@ -6,7 +6,7 @@ const localConfig: TypeOrmModuleOptions = {
   port: 3306,
   username: 'root',
   password: '',
-  database: 'filfox-fns-server',
+  database: 'fns',
   autoLoadEntities: true,
   synchronize: true,
 };
@@ -15,9 +15,9 @@ const prodConfig: TypeOrmModuleOptions = {
   type: 'mysql',
   host: 'localhost',
   port: 3306,
-  username: '6block.com',
-  password: '123456',
-  database: 'filfox-fns-server',
+  username: 'root',
+  password: '',
+  database: 'fns',
   autoLoadEntities: true,
   synchronize: true,
 };
