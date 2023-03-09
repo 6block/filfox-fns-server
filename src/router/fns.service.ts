@@ -218,12 +218,16 @@ export class FnsService {
     })
     searchList = [...new Set(searchList)]
     for (let i in searchList) {
-      const l = utils.namehash(namehash.normalize(`${searchList[i].substring(2).toLocaleLowerCase()}.addr.reverse`))
-      const name = await publicResolverContract.name(l)
-      outPutList.push({
-        owner: searchList[i],
-        name
-      })
+      try {
+        const l = utils.namehash(namehash.normalize(`${searchList[i].substring(2).toLocaleLowerCase()}.addr.reverse`))
+        const name = await publicResolverContract.name(l)
+        outPutList.push({
+          owner: searchList[i],
+          name
+        })
+      } catch {
+
+      }
     }
     await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
   }
