@@ -15,12 +15,14 @@ export class FnsTasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleDomains() {
-    if (!domainLock) {
-      domainLock = true
-      await this.fnsService.asyncFnsNames();
-      domainLock = false
-    }
+    try {
+      if (!domainLock) {
+        domainLock = true
+        await this.fnsService.asyncFnsNames();
+        domainLock = false
+      }
+    } catch {}
   }
 }
