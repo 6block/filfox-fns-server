@@ -210,26 +210,28 @@ export class FnsService {
   }
 
   async asyncFnsNames() {
-    const list: FnsRegistrarRegistered[] = await this.fnsRegistrarRegisteredRepository.find()
-    let searchList = []
-    let outPutList = []
-    list.forEach(item => {
-      searchList.push(item.owner)
-    })
-    searchList = [...new Set(searchList)]
-    for (let i in searchList) {
-      try {
-        const l = utils.namehash(namehash.normalize(`${searchList[i].substring(2).toLocaleLowerCase()}.addr.reverse`))
-        const name = await publicResolverContract.name(l)
-        outPutList.push({
-          owner: searchList[i],
-          name
-        })
-      } catch {
+    try {
+      const list: FnsRegistrarRegistered[] = await this.fnsRegistrarRegisteredRepository.find()
+      let searchList = []
+      let outPutList = []
+      list.forEach(item => {
+        searchList.push(item.owner)
+      })
+      searchList = [...new Set(searchList)]
+      for (let i in searchList) {
+        try {
+          const l = utils.namehash(namehash.normalize(`${searchList[i].substring(2).toLocaleLowerCase()}.addr.reverse`))
+          const name = await publicResolverContract.name(l)
+          outPutList.push({
+            owner: searchList[i],
+            name
+          })
+        } catch {
 
+        }
       }
-    }
-    await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
+      await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
+    } catch {}
   }
 
   async findName(address: string): Promise<NameDto> {
