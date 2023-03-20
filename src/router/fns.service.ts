@@ -26,7 +26,7 @@ const registrarControllerContract = new ethers.Contract(
   provider
 )
 
-// Transfer   Resolver
+// Transfer Resolver
 const registryContract = new ethers.Contract(
   '0xc68c0ef9aec3f1a54921b354eb848482b91d70fe',
   registryAbi as any,
