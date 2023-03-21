@@ -70,7 +70,6 @@ export class FnsService {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = registrarControllerContract.filters.NameRegistered()
       let nodes = (await registrarControllerContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
-      console.log(nodes)
       for (let i in nodes) {
         const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
         _node.blockNumber = nodes[i].blockNumber
@@ -231,7 +230,12 @@ export class FnsService {
 
         }
       }
-      await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
+      if (outPutList.length) {
+        console.log(outPutList)
+        await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
+      } else {
+        console.log(111)
+      }
     } catch {}
   }
 
