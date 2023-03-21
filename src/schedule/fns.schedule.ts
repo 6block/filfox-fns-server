@@ -15,7 +15,7 @@ export class FnsTasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_SECOND)
   async handleDomains() {
     try {
       if (!domainLock) {
