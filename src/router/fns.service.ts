@@ -15,35 +15,35 @@ import { PageDto, PageList } from 'src/dto/page.dto';
 import { TransactionDto } from 'src/dto/transaction.dto';
 var namehash = require('eth-ens-namehash')
 
-const rpcUrl = 'https://hyperspace.filfox.info/rpc/v1'
+const rpcUrl = 'https://filfox.info/rpc/v1'
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
 
 // Registrar
 const registrarControllerContract = new ethers.Contract(
-  '0x12aea3f77ae98b33f27f20825b15e4ab8b381684',
+  '0x3d5ec2dbe382e293fa8c6a53f15fb0ef3b070cb6',
   registrarControllerAbi as any,
   provider
 )
 
 // Transfer Resolver
 const registryContract = new ethers.Contract(
-  '0x889d4f6667ab1aa0a77bc8befbfc9dca5d6ead3d',
+  '0x5eefe33358d32a61aceb2a13640b72bb6f4bfd11',
   registryAbi as any,
   provider
 )
 
 // AddressChanged
 const publicResolverContract = new ethers.Contract(
-  '0xe2c015abb52e22227354f78297f0c2de3807b311',
+  '0x1620524ae061C8Ec6EDBfA19bB6cd138191A834A',
   publicResolverAbi as any,
   provider
 )
 
-let registrarRegisteredHeight = 0
-let registryTransferHeight = 0
-let registryResolverHeight = 0
-let publicResolverHeight = 0
+let registrarRegisteredHeight = 2702782
+let registryTransferHeight = 2702782
+let registryResolverHeight = 2702782
+let publicResolverHeight = 2702782
 
 @Injectable()
 export class FnsService {
@@ -231,10 +231,7 @@ export class FnsService {
         }
       }
       if (outPutList.length) {
-        console.log(outPutList)
         await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
-      } else {
-        console.log(111)
       }
     } catch {}
   }
