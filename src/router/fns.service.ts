@@ -21,21 +21,21 @@ const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
 // Registrar
 const registrarControllerContract = new ethers.Contract(
-  '0x3d5ec2dbe382e293fa8c6a53f15fb0ef3b070cb6',
+  '0xDA3c407a23Ef96930f1A07903fB8360D8926991E',
   registrarControllerAbi as any,
   provider
 )
 
 // Transfer Resolver
 const registryContract = new ethers.Contract(
-  '0x5eefe33358d32a61aceb2a13640b72bb6f4bfd11',
+  '0x916915d0d41EaA8AAEd70b2A5Fb006FFc213961b',
   registryAbi as any,
   provider
 )
 
 // AddressChanged
 const publicResolverContract = new ethers.Contract(
-  '0x1620524ae061C8Ec6EDBfA19bB6cd138191A834A',
+  '0xed9bd04b1BB87Abe2EfF583A977514940c95699c',
   publicResolverAbi as any,
   provider
 )
