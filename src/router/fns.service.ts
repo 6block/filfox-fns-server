@@ -13,6 +13,7 @@ import { publicResolverAbi } from '../abi/public.resolver.abi';
 import { ethers, utils } from 'ethers';
 import { PageDto, PageList } from 'src/dto/page.dto';
 import { TransactionDto } from 'src/dto/transaction.dto';
+import { unionWith } from 'lodash'
 var namehash = require('eth-ens-namehash')
 
 const rpcUrl = 'https://filfox.info/rpc/v1'
@@ -40,10 +41,10 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-let registrarRegisteredHeight = 2702782
-let registryTransferHeight = 2702782
-let registryResolverHeight = 2702782
-let publicResolverHeight = 2702782
+let registrarRegisteredHeight = 2791780
+let registryTransferHeight = 2791780
+let registryResolverHeight = 2791780
+let publicResolverHeight = 2791780
 
 @Injectable()
 export class FnsService {
@@ -70,27 +71,31 @@ export class FnsService {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = registrarControllerContract.filters.NameRegistered()
       let nodes = (await registrarControllerContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
+      console.log(registrarRegisteredHeight)
       for (let i in nodes) {
-        const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
-        _node.blockNumber = nodes[i].blockNumber
-        _node.type = 'NameRegistered'
-        _node.name = nodes[i].args.name + '.fil'
-        _node.owner = nodes[i].args.owner
-        _node.ownerFilAddress = ''
-        _node.transactionHash = nodes[i].transactionHash
-        _node.expires = nodes[i].args.expires.toNumber()
-        const exist: FnsRegistrarRegistered[] = await this.fnsRegistrarRegisteredRepository.find({
-          where: {
-            name: _node.name,
-            type: 'NameRegistered'
+        try {
+          const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
+          _node.blockNumber = nodes[i].blockNumber
+          _node.type = 'NameRegistered'
+          _node.name = nodes[i].args.name + '.fil'
+          _node.owner = nodes[i].args.owner
+          _node.ownerFilAddress = ''
+          _node.transactionHash = nodes[i].transactionHash
+          _node.expires = nodes[i].args.expires.toNumber()
+          const exist: FnsRegistrarRegistered[] = await this.fnsRegistrarRegisteredRepository.find({
+            where: {
+              name: _node.name,
+              type: 'NameRegistered'
+            }
+          })
+          if (!exist.length) {
+            await this.fnsRegistrarRegisteredRepository.save(_node)
           }
-        })
-        if (!exist.length) {
-          await this.fnsRegistrarRegisteredRepository.save(_node)
-        }
+        } catch {}
       }
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
-    } catch {}
+    } catch {
+    }
   }
 
   async asyncRegistryTransfer() {
@@ -99,24 +104,27 @@ export class FnsService {
       const filter = registryContract.filters.Transfer()
       let nodes = (await registryContract.queryFilter(filter, registryTransferHeight, Math.min(registryTransferHeight + 1000, blockHeightNow)))
       for (let i in nodes) {
-        const _node:FnsRegistryTransfer = new FnsRegistryTransfer()
-        _node.blockNumber = nodes[i].blockNumber
-        _node.type = 'Transfer'
-        _node.owner = nodes[i].args.owner
-        _node.ownerFilAddress = ''
-        _node.transactionHash = nodes[i].transactionHash
-        const exist: FnsRegistryTransfer[] = await this.fnsRegistryTransferRepository.find({
-          where: {
-            owner: _node.owner,
-            transactionHash: _node.transactionHash
+        try {
+          const _node:FnsRegistryTransfer = new FnsRegistryTransfer()
+          _node.blockNumber = nodes[i].blockNumber
+          _node.type = 'Transfer'
+          _node.owner = nodes[i].args.owner
+          _node.ownerFilAddress = ''
+          _node.transactionHash = nodes[i].transactionHash
+          const exist: FnsRegistryTransfer[] = await this.fnsRegistryTransferRepository.find({
+            where: {
+              owner: _node.owner,
+              transactionHash: _node.transactionHash
+            }
+          })
+          if (!exist.length) {
+            await this.fnsRegistryTransferRepository.save(_node)
           }
-        })
-        if (!exist.length) {
-          await this.fnsRegistryTransferRepository.save(_node)
-        }
+        } catch {}
       }
       registryTransferHeight = Math.min(registryTransferHeight + 1000, blockHeightNow)
-    } catch {}
+    } catch {
+    }
   }
 
   async asyncRegistryResolver() {
@@ -124,26 +132,33 @@ export class FnsService {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = registryContract.filters.NewResolver()
       let nodes = (await registryContract.queryFilter(filter, registryResolverHeight, Math.min(registryResolverHeight + 1000, blockHeightNow)))
+      nodes = unionWith(nodes, (a, b) => {
+        return a.blockNumber === b.blockNumber && a.transactionIndex === b.transactionIndex
+      })
       for (let i in nodes) {
-        const _node:FnsRegistryResolver = new FnsRegistryResolver()
-        _node.blockNumber = nodes[i].blockNumber
-        _node.type = 'Resolver'
-        _node.resolver = nodes[i].args.resolver
-        _node.resolverFilAddress = ''
-        _node.transactionHash = nodes[i].transactionHash
-        _node.owner = await registryContract.owner(nodes[i].args.node)
-        const exist: FnsRegistryResolver[] = await this.fnsRegistryResolverRepository.find({
-          where: {
-            resolver: _node.resolver,
-            transactionHash: _node.transactionHash
+        try {
+          const _node:FnsRegistryResolver = new FnsRegistryResolver()
+          _node.blockNumber = nodes[i].blockNumber
+          _node.type = 'Resolver'
+          _node.resolver = nodes[i].args.resolver
+          _node.resolverFilAddress = ''
+          _node.transactionHash = nodes[i].transactionHash
+          _node.owner = await registryContract.owner(nodes[i].args.node)
+          _node.owner = ''
+          const exist: FnsRegistryResolver[] = await this.fnsRegistryResolverRepository.find({
+            where: {
+              resolver: _node.resolver,
+              transactionHash: _node.transactionHash
+            }
+          })
+          if (!exist.length) {
+            await this.fnsRegistryResolverRepository.save(_node)
           }
-        })
-        if (!exist.length) {
-          await this.fnsRegistryResolverRepository.save(_node)
-        }
+        } catch {}
       }
       registryResolverHeight = Math.min(registryResolverHeight + 1000, blockHeightNow)
-    } catch {}
+    } catch {
+    }
   }
 
   async asyncPublicResolver() {
@@ -151,27 +166,34 @@ export class FnsService {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = publicResolverContract.filters.AddressChanged()
       let nodes = (await publicResolverContract.queryFilter(filter, publicResolverHeight, Math.min(publicResolverHeight + 1000, blockHeightNow)))
+      nodes = unionWith(nodes, (a, b) => {
+        return a.blockNumber === b.blockNumber && a.transactionIndex === b.transactionIndex
+      })
       for (let i in nodes) {
-        const _node:FnsPublicResolverAddressChanged = new FnsPublicResolverAddressChanged()
-        _node.blockNumber = nodes[i].blockNumber
-        _node.type = 'AddressChanged'
-        _node.newAddress = nodes[i].args.newAddress
-        _node.node = nodes[i].args.node
-        _node.coinType = nodes[i].args.coinType.toNumber()
-        _node.transactionHash = nodes[i].transactionHash
-        _node.owner = await registryContract.owner(nodes[i].args.node)
-        const exist: FnsPublicResolverAddressChanged[] = await this.fnsPublicResolverAddressChangedRepository.find({
-          where: {
-            newAddress: _node.newAddress,
-            transactionHash: _node.transactionHash
+        try {
+          const _node:FnsPublicResolverAddressChanged = new FnsPublicResolverAddressChanged()
+          _node.blockNumber = nodes[i].blockNumber
+          _node.type = 'AddressChanged'
+          _node.newAddress = nodes[i].args.newAddress
+          _node.node = nodes[i].args.node
+          _node.coinType = nodes[i].args.coinType.toNumber()
+          _node.transactionHash = nodes[i].transactionHash
+          _node.owner = await registryContract.owner(nodes[i].args.node)
+          _node.owner = ''
+          const exist: FnsPublicResolverAddressChanged[] = await this.fnsPublicResolverAddressChangedRepository.find({
+            where: {
+              newAddress: _node.newAddress,
+              transactionHash: _node.transactionHash
+            }
+          })
+          if (!exist.length) {
+            await this.fnsPublicResolverAddressChangedRepository.save(_node)
           }
-        })
-        if (!exist.length) {
-          await this.fnsPublicResolverAddressChangedRepository.save(_node)
-        }
+        } catch {}
       }
       publicResolverHeight = Math.min(publicResolverHeight + 1000, blockHeightNow)
-    } catch {}
+    } catch {
+    }
   }
 
   async getRegisteredByPage(page: PageDto): Promise<PageList<FnsRegistrarRegistered>> {
@@ -198,7 +220,7 @@ export class FnsService {
     }
     let list = await Promise.all([
       this.fnsRegistrarRegisteredRepository.find(searchParams),
-      this.fnsRegistryResolverRepository.find(searchParams),
+      this.fnsRegistryTransferRepository.find(searchParams),
       this.fnsRegistryResolverRepository.find(searchParams),
       this.fnsPublicResolverAddressChangedRepository.find(searchParams)
     ])
@@ -242,3 +264,5 @@ export class FnsService {
     return item || { owner: '', name: ''}
   }
 }
+
+
