@@ -16,9 +16,8 @@ import { TransactionDto } from 'src/dto/transaction.dto';
 import { unionWith } from 'lodash'
 var namehash = require('eth-ens-namehash')
 
-const rpcUrl = 'https://api.calibration.node.glif.io/rpc/v1'
+const rpcUrl = 'https://calibration.filfox.info/rpc/v1'
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
-
 
 // Registrar
 const registrarControllerContract = new ethers.Contract(
