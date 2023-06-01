@@ -97,10 +97,13 @@ export class FnsService {
           if (!exist.length) {
             await this.fnsRegistrarRegisteredRepository.save(_node)
           }
-        } catch {}
+        } catch(error) {
+          console.log(error)
+        }
       }
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
     } catch {
+      
     }
   }
 
