@@ -16,35 +16,35 @@ import { TransactionDto } from 'src/dto/transaction.dto';
 import { unionWith } from 'lodash'
 var namehash = require('eth-ens-namehash')
 
-const rpcUrl = 'https://filfox.info/rpc/v1'
+const rpcUrl = 'https://api.calibration.node.glif.io/rpc/v1'
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
 
 // Registrar
 const registrarControllerContract = new ethers.Contract(
-  '0xDA3c407a23Ef96930f1A07903fB8360D8926991E',
+  '0x392d1959CFbdCA10342e7D32BCeF87e2Ac25221e',
   registrarControllerAbi as any,
   provider
 )
 
 // Transfer Resolver
 const registryContract = new ethers.Contract(
-  '0x916915d0d41EaA8AAEd70b2A5Fb006FFc213961b',
+  '0x0381f0c42f542DEcEBC3ea1A27B3eF4ac1F258b6',
   registryAbi as any,
   provider
 )
 
 // AddressChanged
 const publicResolverContract = new ethers.Contract(
-  '0xed9bd04b1BB87Abe2EfF583A977514940c95699c',
+  '0x7EEa7D977fff536d9B8752a5dF24A00E288c1B43',
   publicResolverAbi as any,
   provider
 )
 
-let registrarRegisteredHeight = 2791780
-let registryTransferHeight = 2791780
-let registryResolverHeight = 2791780
-let publicResolverHeight = 2791780
+let registrarRegisteredHeight = 602958
+let registryTransferHeight = 602958
+let registryResolverHeight = 602958
+let publicResolverHeight = 602958
 
 @Injectable()
 export class FnsService {
