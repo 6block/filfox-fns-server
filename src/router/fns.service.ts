@@ -22,7 +22,7 @@ const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
 // Registrar
 const registrarControllerContract = new ethers.Contract(
-  '0x392d1959CFbdCA10342e7D32BCeF87e2Ac25221e',
+  '0xc5b7f7f5dFB7f16F74476564Fe2e3B5a7C182Cd4',
   registrarControllerAbi as any,
   provider
 )
@@ -58,7 +58,6 @@ export class FnsService {
 
   async asyncFnsEvents() {
     try {
-      console.log('asyncFnsEvents...')
       const promiseList = [
         this.asyncRegistrarRegistered(),
         this.asyncRegistryTransfer(),
@@ -66,7 +65,6 @@ export class FnsService {
         this.asyncPublicResolver()
       ]
       await Promise.all(promiseList)
-      console.log('asyncFnsEvents over')
     } catch (error) {
       console.log(error)
     }
