@@ -57,13 +57,19 @@ export class FnsService {
   ) {}
 
   async asyncFnsEvents() {
-    const promiseList = [
-      this.asyncRegistrarRegistered(),
-      this.asyncRegistryTransfer(),
-      this.asyncRegistryResolver(),
-      this.asyncPublicResolver()
-    ]
-    await Promise.all(promiseList)
+    try {
+      console.log('asyncFnsEvents...')
+      const promiseList = [
+        this.asyncRegistrarRegistered(),
+        this.asyncRegistryTransfer(),
+        this.asyncRegistryResolver(),
+        this.asyncPublicResolver()
+      ]
+      await Promise.all(promiseList)
+      console.log('asyncFnsEvents over')
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async asyncRegistrarRegistered() {
