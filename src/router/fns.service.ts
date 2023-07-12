@@ -10,14 +10,31 @@ import { Repository } from 'typeorm';
 import { registryAbi } from '../abi/registry.abi';
 import { registrarControllerAbi } from '../abi/registrar.controller.abi';
 import { publicResolverAbi } from '../abi/public.resolver.abi';
+import { registrarAbi } from '../abi/registrar.abi'
 import { ethers, utils } from 'ethers';
 import { PageDto, PageList } from 'src/dto/page.dto';
 import { TransactionDto } from 'src/dto/transaction.dto';
-import { unionWith } from 'lodash'
+import { unionWith, uniqBy } from 'lodash'
 var namehash = require('eth-ens-namehash')
 
 const rpcUrl = 'https://filfox.info/rpc/v1'
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
+
+const detailRpcUrl = 'https://api.node.glif.io/rpc/v1'
+const d_provider = new ethers.providers.JsonRpcProvider(detailRpcUrl)
+
+
+const registrarContract = new ethers.Contract(
+  '0x45d9d6408d5159a379924cf423cb7e15C00fA81f',
+  registrarAbi,
+  provider
+)
+
+const d_registrarContract = new ethers.Contract(
+  '0x45d9d6408d5159a379924cf423cb7e15C00fA81f',
+  registrarAbi,
+  d_provider
+)
 
 
 // Registrar
@@ -41,10 +58,10 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-let registrarRegisteredHeight = 2791780
-let registryTransferHeight = 2791780
-let registryResolverHeight = 2791780
-let publicResolverHeight = 2791780
+let registrarRegisteredHeight = 2783000
+let registryTransferHeight = 2783000
+let registryResolverHeight = 2783000
+let publicResolverHeight = 2783000
 
 @Injectable()
 export class FnsService {
@@ -69,15 +86,18 @@ export class FnsService {
   async asyncRegistrarRegistered() {
     try {
       const blockHeightNow = await provider.getBlockNumber()
-      const filter = registrarControllerContract.filters.NameRegistered()
-      let nodes = (await registrarControllerContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
-      console.log(registrarRegisteredHeight)
+      const filter = registrarContract.filters.NameRegistered()
+      let nodes: any[] = (await registrarContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
+      for (let i in nodes) {
+        nodes[i].id = nodes[i].args.id
+      }
+      nodes = uniqBy(nodes, 'id')
       for (let i in nodes) {
         try {
           const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
           _node.blockNumber = nodes[i].blockNumber
           _node.type = 'NameRegistered'
-          _node.name = nodes[i].args.name + '.fil'
+          _node.name = (await d_registrarContract.nameOf(nodes[i].args.id)) + '.fil'
           _node.owner = nodes[i].args.owner
           _node.ownerFilAddress = ''
           _node.transactionHash = nodes[i].transactionHash
@@ -94,8 +114,7 @@ export class FnsService {
         } catch {}
       }
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
-    } catch {
-    }
+    } catch {}
   }
 
   async asyncRegistryTransfer() {
@@ -123,8 +142,7 @@ export class FnsService {
         } catch {}
       }
       registryTransferHeight = Math.min(registryTransferHeight + 1000, blockHeightNow)
-    } catch {
-    }
+    } catch {}
   }
 
   async asyncRegistryResolver() {
@@ -157,8 +175,7 @@ export class FnsService {
         } catch {}
       }
       registryResolverHeight = Math.min(registryResolverHeight + 1000, blockHeightNow)
-    } catch {
-    }
+    } catch {}
   }
 
   async asyncPublicResolver() {
@@ -192,8 +209,7 @@ export class FnsService {
         } catch {}
       }
       publicResolverHeight = Math.min(publicResolverHeight + 1000, blockHeightNow)
-    } catch {
-    }
+    } catch {}
   }
 
   async getRegisteredByPage(page: PageDto): Promise<PageList<FnsRegistrarRegistered>> {
@@ -244,13 +260,12 @@ export class FnsService {
         try {
           const l = utils.namehash(namehash.normalize(`${searchList[i].substring(2).toLocaleLowerCase()}.addr.reverse`))
           const name = await publicResolverContract.name(l)
+          console.log(name)
           outPutList.push({
             owner: searchList[i],
             name
           })
-        } catch {
-
-        }
+        } catch {}
       }
       if (outPutList.length) {
         await this.cacheService.set(`filfox:fns:registered`, outPutList, null);
