@@ -49,10 +49,10 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-let registrarRegisteredHeight = 3010000
-let registryTransferHeight = 3010000
-let registryResolverHeight = 3010000
-let publicResolverHeight = 3010000
+let registrarRegisteredHeight = 3028320
+let registryTransferHeight = 3028320
+let registryResolverHeight = 3028320
+let publicResolverHeight = 3028320
 
 @Injectable()
 export class FnsService {
