@@ -20,20 +20,11 @@ var namehash = require('eth-ens-namehash')
 const rpcUrl = 'https://filfox.info/rpc/v1'
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
-const detailRpcUrl = 'https://api.node.glif.io/rpc/v1'
-const d_provider = new ethers.providers.JsonRpcProvider(detailRpcUrl)
-
 
 const registrarContract = new ethers.Contract(
   '0x45d9d6408d5159a379924cf423cb7e15C00fA81f',
   registrarAbi,
   provider
-)
-
-const d_registrarContract = new ethers.Contract(
-  '0x45d9d6408d5159a379924cf423cb7e15C00fA81f',
-  registrarAbi,
-  d_provider
 )
 
 
@@ -58,10 +49,10 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-let registrarRegisteredHeight = 2783000
-let registryTransferHeight = 2783000
-let registryResolverHeight = 2783000
-let publicResolverHeight = 2783000
+let registrarRegisteredHeight = 3010000
+let registryTransferHeight = 3010000
+let registryResolverHeight = 3010000
+let publicResolverHeight = 3010000
 
 @Injectable()
 export class FnsService {
@@ -97,7 +88,7 @@ export class FnsService {
           const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
           _node.blockNumber = nodes[i].blockNumber
           _node.type = 'NameRegistered'
-          _node.name = (await d_registrarContract.nameOf(nodes[i].args.id)) + '.fil'
+          _node.name = (await registrarContract.nameOf(nodes[i].args.id)) + '.fil'
           _node.owner = nodes[i].args.owner
           _node.ownerFilAddress = ''
           _node.transactionHash = nodes[i].transactionHash
@@ -260,7 +251,6 @@ export class FnsService {
         try {
           const l = utils.namehash(namehash.normalize(`${searchList[i].substring(2).toLocaleLowerCase()}.addr.reverse`))
           const name = await publicResolverContract.name(l)
-          console.log(name)
           outPutList.push({
             owner: searchList[i],
             name
