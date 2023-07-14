@@ -49,10 +49,10 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-let registrarRegisteredHeight = 2783000
-let registryTransferHeight = 2783000
-let registryResolverHeight = 2783000
-let publicResolverHeight = 2783000
+let registrarRegisteredHeight = 2867933
+let registryTransferHeight = 2867933
+let registryResolverHeight = 2867933
+let publicResolverHeight = 2867933
 
 @Injectable()
 export class FnsService {
@@ -80,10 +80,14 @@ export class FnsService {
     try {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = registrarContract.filters.NameRegistered()
+      this.logger.log(`start sync ${registrarRegisteredHeight}`)
       let nodes: any[] = (await registrarContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
+      this.logger.log(`finished`)
+      
       for (let i in nodes) {
         nodes[i].id = nodes[i].args.id
       }
+
       nodes = uniqBy(nodes, 'id')
       for (let i in nodes) {
         try {
@@ -104,10 +108,14 @@ export class FnsService {
           if (!exist.length) {
             await this.fnsRegistrarRegisteredRepository.save(_node)
           }
-        } catch {}
+        } catch (error) {
+          this.logger.error(error)
+        }
       }
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
-    } catch {}
+    } catch (error) {
+      this.logger.error(error)
+    }
   }
 
   async getNameByTokenId(tokenId: string){
