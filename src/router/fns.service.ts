@@ -49,7 +49,7 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-const START_BLOCK = 3016733
+const START_BLOCK = 3027733
 
 let registrarRegisteredHeight = START_BLOCK
 let registryTransferHeight = START_BLOCK
