@@ -6,7 +6,7 @@ const localConfig: TypeOrmModuleOptions = {
   port: 3306,
   username: 'root',
   password: '123456',
-  database: 'fns_mainnet_v2',
+  database: 'fns_mainnet_v3',
   autoLoadEntities: true,
   synchronize: true,
 };
@@ -17,7 +17,7 @@ const prodConfig: TypeOrmModuleOptions = {
   port: 3306,
   username: 'root',
   password: '123456',
-  database: 'fns_mainnet_v2',
+  database: 'fns_mainnet_v3',
   autoLoadEntities: true,
   synchronize: true,
 };

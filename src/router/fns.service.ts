@@ -3,10 +3,10 @@ import { FnsPublicResolverAddressChanged } from './../entity/fns.public.resolver
 import { FnsRegistryTransfer } from 'src/entity/fns.registry.transfer';
 import { FnsRegistryResolver } from 'src/entity/fns.registry.resolver';
 import { FnsRegistrarRegistered } from '../entity/fns.registrar.registered';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CacheService } from 'src/utils/cache/cache.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Not, Repository } from 'typeorm';
 import { registryAbi } from '../abi/registry.abi';
 import { registrarControllerAbi } from '../abi/registrar.controller.abi';
 import { publicResolverAbi } from '../abi/public.resolver.abi';
@@ -64,6 +64,8 @@ export class FnsService {
     @InjectRepository(FnsPublicResolverAddressChanged) private fnsPublicResolverAddressChangedRepository: Repository<FnsPublicResolverAddressChanged>,
   ) {}
 
+  private readonly logger = new Logger(FnsService.name)
+
   async asyncFnsEvents() {
     const promiseList = [
       this.asyncRegistrarRegistered(),
@@ -88,7 +90,7 @@ export class FnsService {
           const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
           _node.blockNumber = nodes[i].blockNumber
           _node.type = 'NameRegistered'
-          _node.name = (await registrarContract.nameOf(nodes[i].args.id)) + '.fil'
+          _node.name = await this.getNameByTokenId(nodes[i].args.id)
           _node.owner = nodes[i].args.owner
           _node.ownerFilAddress = ''
           _node.transactionHash = nodes[i].transactionHash
@@ -106,6 +108,54 @@ export class FnsService {
       }
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
     } catch {}
+  }
+
+  async getNameByTokenId(tokenId: string){
+    let name = ''
+
+    try {
+      name = (await registrarContract.nameOf(tokenId))
+    } catch (error) {
+      name = ''
+    }
+
+    return name ? `${name}.fil` : tokenId
+  }
+
+  // 扫描 NameRegistered 事件表，填充 name
+  async checkNameRegistered() {
+
+    try {
+      const events = await this.fnsRegistrarRegisteredRepository.find({
+        where: {
+          name: Not(Like('%.fil')),
+          type: 'NameRegistered'
+        }
+      })
+
+      if (!events.length) {
+        this.logger.log("Fill NameRegistered's name over")
+        return
+      }
+
+      for (let i = 0; i < events.length; i++) {
+        const tokenId = events[i].name
+        this.logger.log(`Filling ${tokenId}...`)
+
+        const name = await this.getNameByTokenId(tokenId)
+        if (!/\.fil$/.test(name)) continue
+
+        await this.fnsRegistrarRegisteredRepository.update({ name: tokenId }, { name })
+
+        this.logger.log(`${tokenId} : ${name}`)
+      }
+
+      this.logger.log(`Checked ${events.length} names`)
+    } catch (error) {
+      this.logger.error('checkNameRegistered() error:', error)
+    } finally {
+      setTimeout(() => this.checkNameRegistered(), 1000 * 10)
+    }
   }
 
   async asyncRegistryTransfer() {

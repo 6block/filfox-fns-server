@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron, CronExpression, Timeout } from '@nestjs/schedule';
 import { FnsService } from 'src/router/fns.service';
 let eventLock = false
 let domainLock = false
@@ -24,5 +24,10 @@ export class FnsTasksService {
         domainLock = false
       }
     } catch {}
+  }
+
+  @Timeout(3000)
+  async checkNameRegistered() {
+    this.fnsService.checkNameRegistered()
   }
 }
