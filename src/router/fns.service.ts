@@ -66,51 +66,33 @@ export class FnsService {
 
   private readonly logger = new Logger(FnsService.name)
 
-  async asyncFnsEvents() {
-    const promiseList = [
-      this.asyncRegistrarRegistered(),
-      this.asyncRegistryTransfer(),
-      this.asyncRegistryResolver(),
-      this.asyncPublicResolver()
-    ]
-    await Promise.all(promiseList)
-  }
-
   async asyncRegistrarRegistered() {
     try {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = registrarContract.filters.NameRegistered()
-      this.logger.log(`start sync ${registrarRegisteredHeight}`)
+      this.logger.log(`start sync NameRegistered events from : ${registrarRegisteredHeight}`)
       let nodes: any[] = (await registrarContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
       this.logger.log(`finished`)
       
-      for (let i in nodes) {
-        nodes[i].id = nodes[i].args.id
-      }
-
+      for (let i in nodes) { nodes[i].id = nodes[i].args.id }
       nodes = uniqBy(nodes, 'id')
+
       for (let i in nodes) {
-        try {
-          const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
-          _node.blockNumber = nodes[i].blockNumber
-          _node.type = 'NameRegistered'
-          _node.name = await this.getNameByTokenId(nodes[i].args.id)
-          _node.owner = nodes[i].args.owner
-          _node.ownerFilAddress = ''
-          _node.transactionHash = nodes[i].transactionHash
-          _node.expires = nodes[i].args.expires.toNumber()
-          const exist: FnsRegistrarRegistered[] = await this.fnsRegistrarRegisteredRepository.find({
-            where: {
-              name: _node.name,
-              type: 'NameRegistered'
-            }
-          })
-          if (!exist.length) {
-            await this.fnsRegistrarRegisteredRepository.save(_node)
+        const _node:FnsRegistrarRegistered = new FnsRegistrarRegistered()
+        _node.blockNumber = nodes[i].blockNumber
+        _node.type = 'NameRegistered'
+        _node.name = await this.getNameByTokenId(nodes[i].args.id)
+        _node.owner = nodes[i].args.owner
+        _node.ownerFilAddress = ''
+        _node.transactionHash = nodes[i].transactionHash
+        _node.expires = nodes[i].args.expires.toNumber()
+        const exist: FnsRegistrarRegistered[] = await this.fnsRegistrarRegisteredRepository.find({
+          where: {
+            name: _node.name,
+            type: 'NameRegistered'
           }
-        } catch (error) {
-          this.logger.error(error)
-        }
+        })
+        if (!exist.length) await this.fnsRegistrarRegisteredRepository.save(_node)
       }
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
     } catch (error) {
@@ -130,9 +112,8 @@ export class FnsService {
     return name ? `${name}.fil` : tokenId
   }
 
-  // 扫描 NameRegistered 事件表，填充 name
+  // 扫描 NameRegistered 事件表，校准 name
   async checkNameRegistered() {
-
     try {
       const events = await this.fnsRegistrarRegisteredRepository.find({
         where: {
@@ -142,7 +123,6 @@ export class FnsService {
       })
 
       if (!events.length) {
-        this.logger.log("Fill NameRegistered's name over")
         return
       }
 
@@ -154,7 +134,6 @@ export class FnsService {
         if (!/\.fil$/.test(name)) continue
 
         await this.fnsRegistrarRegisteredRepository.update({ name: tokenId }, { name })
-
         this.logger.log(`${tokenId} : ${name}`)
       }
 
@@ -162,7 +141,7 @@ export class FnsService {
     } catch (error) {
       this.logger.error('checkNameRegistered() error:', error)
     } finally {
-      setTimeout(() => this.checkNameRegistered(), 1000 * 10)
+      setTimeout(() => this.checkNameRegistered(), 1000 * 15)
     }
   }
 
