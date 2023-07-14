@@ -73,7 +73,7 @@ export class FnsService {
       const blockHeightNow = await provider.getBlockNumber()
       const filter = registrarContract.filters.NameRegistered()
       this.logger.log(`start sync NameRegistered events from : ${registrarRegisteredHeight}`)
-      let nodes: any[] = (await registrarContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
+      let nodes: any[] = (await registrarContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 200, blockHeightNow)))
       this.logger.log(`finished`)
       
       for (let i in nodes) { nodes[i].id = nodes[i].args.id }
@@ -96,7 +96,7 @@ export class FnsService {
         })
         if (!exist.length) await this.fnsRegistrarRegisteredRepository.save(_node)
       }
-      registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
+      registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 200, blockHeightNow)
     } catch (error) {
       this.logger.error(error)
     }
