@@ -49,7 +49,7 @@ const publicResolverContract = new ethers.Contract(
   provider
 )
 
-const START_BLOCK = 3027733
+const START_BLOCK = 3036099
 
 let registrarRegisteredHeight = START_BLOCK
 let registryTransferHeight = START_BLOCK
@@ -74,6 +74,7 @@ export class FnsService {
       const filter = registrarContract.filters.NameRegistered()
       this.logger.log(`start sync NameRegistered events from : ${registrarRegisteredHeight}`)
       let nodes: any[] = (await registrarContract.queryFilter(filter, registrarRegisteredHeight, Math.min(registrarRegisteredHeight + 1000, blockHeightNow)))
+      this.logger.log(`finished : get ${nodes.length} NameRegistered events`)
       
       for (let i in nodes) { nodes[i].id = nodes[i].args.id }
       nodes = uniqBy(nodes, 'id')
@@ -97,7 +98,7 @@ export class FnsService {
       }
 
       registrarRegisteredHeight = Math.min(registrarRegisteredHeight + 1000, blockHeightNow)
-      this.logger.log(`finished : get ${nodes.length} NameRegistered events`)
+      this.logger.log(`${nodes.length} NameRegistered events saved to db`)
     } catch (error) {
       this.logger.error(error)
     }
