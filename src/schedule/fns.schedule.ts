@@ -12,7 +12,7 @@ let domainLock = false
 export class FnsTasksService {
   constructor(private readonly fnsService: FnsService) {}
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron('*/30 * * * * *')
   async asyncRegistrarRegistered() {
     if (!eventLock1) {
       eventLock1 = true
@@ -21,7 +21,7 @@ export class FnsTasksService {
     }
   }
 
-  @Cron(CronExpression.EVERY_SECOND)
+  @Cron('*/30 * * * * *')
   async asyncRegistryTransfer() {
     if (!eventLock2) {
       eventLock2 = true

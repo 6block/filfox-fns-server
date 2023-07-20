@@ -17,7 +17,7 @@ import { TransactionDto } from 'src/dto/transaction.dto';
 import { unionWith, uniqBy } from 'lodash'
 var namehash = require('eth-ens-namehash')
 
-const rpcUrl = 'https://filfox.info/rpc/v1'
+const rpcUrl = 'http://36.189.234.221:17101/rpc/v1'
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
 
