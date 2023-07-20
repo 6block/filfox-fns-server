@@ -17,8 +17,10 @@ import { TransactionDto } from 'src/dto/transaction.dto';
 import { unionWith, uniqBy } from 'lodash'
 
 var namehash = require('eth-ens-namehash')
+require('dotenv').config()
 
-const rpcUrl = process.env['RPC']
+const rpcUrl = process.env.RPC
+console.log('rpcUrl=', rpcUrl)
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
 
 const registrarContract = new ethers.Contract(
