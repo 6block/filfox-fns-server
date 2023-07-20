@@ -15,11 +15,11 @@ import { ethers, utils } from 'ethers';
 import { PageDto, PageList } from 'src/dto/page.dto';
 import { TransactionDto } from 'src/dto/transaction.dto';
 import { unionWith, uniqBy } from 'lodash'
+
 var namehash = require('eth-ens-namehash')
 
-const rpcUrl = 'http://36.189.234.221:17101/rpc/v1'
+const rpcUrl = process.env['RPC']
 const provider = new ethers.providers.JsonRpcProvider(rpcUrl)
-
 
 const registrarContract = new ethers.Contract(
   '0x45d9d6408d5159a379924cf423cb7e15C00fA81f',

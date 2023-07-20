@@ -5,6 +5,7 @@ import { TransformInterceptor } from './interceptor/transform.interceptor';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
+  require('dotenv').config()
   const app = await NestFactory.create(AppModule, { cors: true });
   // http filter
   app.useGlobalFilters(new HttpExceptionFilter());
